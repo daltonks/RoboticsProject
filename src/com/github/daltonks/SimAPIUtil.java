@@ -18,6 +18,10 @@ public class SimAPIUtil {
         }
     }
 
+    public static void handleResponse(int code) {
+        handleResponse(code, () -> { });
+    }
+
     public static void handleResponse(int code, Runnable onSuccess) {
         handleResponse(code, onSuccess, () -> { });
     }

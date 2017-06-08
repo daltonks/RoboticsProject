@@ -4,15 +4,19 @@ import coppelia.IntW;
 import coppelia.IntWA;
 import coppelia.remoteApi;
 
-import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
 import java.net.ConnectException;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 
 public class Simulation {
     private remoteApi api;
     private int clientID;
+
+    public remoteApi getRemoteApi() {
+        return api;
+    }
+
+    public int getClientID() {
+        return clientID;
+    }
 
     public void start(String ip, int port, boolean waitUntilConnected, boolean doNotReconnectOnceDisconnected, int timeOutInMs, int commThreadCycleInMs) throws ConnectException {
         api = new remoteApi();
@@ -38,7 +42,7 @@ public class Simulation {
     public SimObject[] getAllObjects() {
         IntWA objectHandles = new IntWA(1);
         return SimAPIUtil.handleResponse(
-            api.simxGetObjects(clientID, remoteApi.sim_handle_all, objectHandles, remoteApi.simx_opmode_blocking),
+            api.simxGetObjects(clientID, api.sim_handle_all, objectHandles, api.simx_opmode_blocking),
             () -> {
                 int[] intArray = objectHandles.getArray();
                 SimObject[] simObjectArray = new SimObject[intArray.length];
@@ -48,5 +52,21 @@ public class Simulation {
                 return simObjectArray;
             }
         );
+    }
+
+    public SimObject getObject(String objectName) {
+        IntW handle = new IntW(0);
+        return SimAPIUtil.handleResponse(
+            api.simxGetObjectHandle(clientID, objectName, handle, api.simx_opmode_blocking),
+            () -> createSimObject(handle)
+        );
+    }
+
+    private SimObject createSimObject(IntW handle) {
+        return createSimObject(handle.getValue());
+    }
+
+    private SimObject createSimObject(int handle) {
+        return new SimObject(handle, this);
     }
 }
