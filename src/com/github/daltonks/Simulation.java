@@ -27,7 +27,7 @@ public class Simulation {
     public void end() {
         // Before closing the connection to V-REP, make sure that the last command sent out had time to arrive. You can guarantee this with (for example):
         IntW pingTime = new IntW(0);
-        api.simxGetPingTime(clientID,pingTime);
+        api.simxGetPingTime(clientID, pingTime);
         api.simxFinish(clientID);
     }
 
