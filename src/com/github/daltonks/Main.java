@@ -1,7 +1,4 @@
 package com.github.daltonks;
-import coppelia.IntW;
-import coppelia.IntWA;
-import coppelia.remoteApi;
 
 // Make sure to have the server side running in V-REP:
 // in a child script of a V-REP scene, add following command
@@ -14,58 +11,29 @@ import coppelia.remoteApi;
 // IMPORTANT: for each successful call to simxStart, there
 // should be a corresponding call to simxFinish at the end!
 
+import java.net.ConnectException;
+
 public class Main
 {
+    private static final String REMOTE_IP = "127.0.0.1";
+    private static final int REMOTE_PORT = 19999;
+    private static final boolean WAIT_UNTIL_CONNECTED = true;
+    private static final boolean DO_NOT_RECONNECT_ONCE_DISCONNECTED = false;
+    private static final int TIME_OUT_IN_MS = 10000;
+    private static final int COMM_THREAD_CYCLE_IN_MS = 5;
+
     public static void main(String[] args)
     {
-        System.out.println("Program started");
-        remoteApi vrep = new remoteApi();
-        vrep.simxFinish(-1); // just in case, close all opened connections
-        int clientID = vrep.simxStart("127.0.0.1",19999,true,true,5000,5);
-        if (clientID!=-1)
-        {
-            System.out.println("Connected to remote API server");
-
-            // Now try to retrieve data in a blocking fashion (i.e. a service call):
-            IntWA objectHandles = new IntWA(1);
-            int ret=vrep.simxGetObjects(clientID, remoteApi.sim_handle_all,objectHandles, remoteApi.simx_opmode_blocking);
-            if (ret== remoteApi.simx_return_ok)
-                System.out.format("Number of objects in the scene: %d\n",objectHandles.getArray().length);
-            else
-                System.out.format("Remote API function call returned with error code: %d\n",ret);
-
-            try
-            {
-                Thread.sleep(2000);
-            }
-            catch(InterruptedException ex)
-            {
-                Thread.currentThread().interrupt();
-            }
-
-            // Now retrieve streaming data (i.e. in a non-blocking fashion):
-            long startTime=System.currentTimeMillis();
-            IntW mouseX = new IntW(0);
-            vrep.simxGetIntegerParameter(clientID, remoteApi.sim_intparam_mouse_x,mouseX, remoteApi.simx_opmode_streaming); // Initialize streaming
-            while (System.currentTimeMillis()-startTime < 5000)
-            {
-                ret=vrep.simxGetIntegerParameter(clientID, remoteApi.sim_intparam_mouse_x,mouseX, remoteApi.simx_opmode_buffer); // Try to retrieve the streamed data
-                if (ret== remoteApi.simx_return_ok) // After initialization of streaming, it will take a few ms before the first value arrives, so check the return code
-                    System.out.format("Mouse position x: %d\n",mouseX.getValue()); // Mouse position x is actualized when the cursor is over V-REP's window
-            }
-
-            // Now send some data to V-REP in a non-blocking fashion:
-            vrep.simxAddStatusbarMessage(clientID,"Hello V-REP!", remoteApi.simx_opmode_oneshot);
-
-            // Before closing the connection to V-REP, make sure that the last command sent out had time to arrive. You can guarantee this with (for example):
-            IntW pingTime = new IntW(0);
-            vrep.simxGetPingTime(clientID,pingTime);
-
-            // Now close the connection to V-REP:
-            vrep.simxFinish(clientID);
+        Simulation simulation = new Simulation();
+        try {
+            simulation.start(REMOTE_IP, REMOTE_PORT, WAIT_UNTIL_CONNECTED, DO_NOT_RECONNECT_ONCE_DISCONNECTED, TIME_OUT_IN_MS, COMM_THREAD_CYCLE_IN_MS);
+            System.out.println(simulation.getAllObjectHandles().length);
+        } catch (ConnectException e) {
+            e.printStackTrace();
         }
-        else
-            System.out.println("Failed connecting to remote API server");
+
+        simulation.end();
+
         System.out.println("Program ended");
     }
 }
