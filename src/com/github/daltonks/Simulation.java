@@ -4,7 +4,11 @@ import coppelia.IntW;
 import coppelia.IntWA;
 import coppelia.remoteApi;
 
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.net.ConnectException;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 public class Simulation {
     private remoteApi api;
@@ -31,14 +35,18 @@ public class Simulation {
         api.simxFinish(clientID);
     }
 
-    public int[] getAllObjectHandles() {
+    public SimObject[] getAllObjects() {
         IntWA objectHandles = new IntWA(1);
-        int ret = api.simxGetObjects(clientID, remoteApi.sim_handle_all, objectHandles, remoteApi.simx_opmode_blocking);
-        if (ret == remoteApi.simx_return_ok)
-            return objectHandles.getArray();
-        else {
-            System.out.format("Remote API function call returned with error code: %d\n",ret);
-            return null;
-        }
+        return SimAPIUtil.handleResponse(
+            api.simxGetObjects(clientID, remoteApi.sim_handle_all, objectHandles, remoteApi.simx_opmode_blocking),
+            () -> {
+                int[] intArray = objectHandles.getArray();
+                SimObject[] simObjectArray = new SimObject[intArray.length];
+                for(int i = 0; i < simObjectArray.length; i++) {
+                    simObjectArray[i] = new SimObject(intArray[i], this);
+                }
+                return simObjectArray;
+            }
+        );
     }
 }
