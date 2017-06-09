@@ -1,7 +1,6 @@
 package com.github.daltonks;
 
 import coppelia.IntW;
-import coppelia.IntWA;
 import coppelia.remoteApi;
 
 import java.net.ConnectException;
@@ -33,40 +32,20 @@ public class Simulation {
     }
 
     public void end() {
-        // Before closing the connection to V-REP, make sure that the last command sent out had time to arrive. You can guarantee this with (for example):
-        IntW pingTime = new IntW(0);
-        api.simxGetPingTime(clientID, pingTime);
+        guaranteeLastApiCallWasReceived();
         api.simxFinish(clientID);
     }
 
-    public SimObject[] getAllObjects() {
-        IntWA objectHandles = new IntWA(1);
-        return SimAPIUtil.handleResponse(
-            api.simxGetObjects(clientID, api.sim_handle_all, objectHandles, api.simx_opmode_blocking),
-            () -> {
-                int[] intArray = objectHandles.getArray();
-                SimObject[] simObjectArray = new SimObject[intArray.length];
-                for(int i = 0; i < simObjectArray.length; i++) {
-                    simObjectArray[i] = new SimObject(intArray[i], this);
-                }
-                return simObjectArray;
-            }
-        );
+    private void guaranteeLastApiCallWasReceived() {
+        IntW pingTime = new IntW(0);
+        api.simxGetPingTime(clientID, pingTime);
     }
 
     public SimObject getObject(String objectName) {
         IntW handle = new IntW(0);
         return SimAPIUtil.handleResponse(
             api.simxGetObjectHandle(clientID, objectName, handle, api.simx_opmode_blocking),
-            () -> createSimObject(handle)
+            () -> new SimObject(handle.getValue(), this)
         );
-    }
-
-    private SimObject createSimObject(IntW handle) {
-        return createSimObject(handle.getValue());
-    }
-
-    private SimObject createSimObject(int handle) {
-        return new SimObject(handle, this);
     }
 }

@@ -13,7 +13,7 @@ public class SensorImage {
         return resolutionY;
     }
 
-    public SensorImage(char[] chars, int resolutionX, int resolutionY) {
+    public SensorImage(char[] charColors, int resolutionX, int resolutionY) {
         this.resolutionX = resolutionX;
         this.resolutionY = resolutionY;
 
@@ -24,9 +24,9 @@ public class SensorImage {
                 int redCharIndex = (y * resolutionX + x) * 3;
 
                 colors[x][y] = new Color(
-                    chars[redCharIndex],
-                    chars[redCharIndex + 1],
-                    chars[redCharIndex + 2]
+                    charColors[redCharIndex],
+                    charColors[redCharIndex + 1],
+                    charColors[redCharIndex + 2]
                 );
             }
         }
