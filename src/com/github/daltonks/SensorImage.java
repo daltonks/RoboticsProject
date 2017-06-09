@@ -14,7 +14,6 @@ public class SensorImage {
     }
 
     public SensorImage(char[] chars, int resolutionX, int resolutionY) {
-        System.out.println(chars.length);
         this.resolutionX = resolutionX;
         this.resolutionY = resolutionY;
 
