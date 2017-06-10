@@ -2,23 +2,24 @@ package com.github.daltonks.pioneer.imageProcessing;
 
 import com.github.daltonks.Color;
 import com.github.daltonks.SensorImage;
+import javafx.util.Pair;
 
 public class PioneerProcessedImage {
-    private PioneerProcessedImagePixel[][] pixels;
+    private PioneerProcessedPixelType[][] pixels;
 
     public PioneerProcessedImage(SensorImage image) {
-        pixels = new PioneerProcessedImagePixel[image.getResolutionX()][image.getResolutionY()];
+        pixels = new PioneerProcessedPixelType[image.getResolutionX()][image.getResolutionY()];
         for(int y = 0; y < image.getResolutionY(); y++) {
             for(int x = 0; x < image.getResolutionX(); x++) {
                 Color color = image.getColor(x, y);
 
-                PioneerProcessedImagePixel pixel;
+                PioneerProcessedPixelType pixel;
                 if(color.red < 20 && color.green < 20 && color.blue < 20) { //Black path
-                    pixel = PioneerProcessedImagePixel.Path;
+                    pixel = PioneerProcessedPixelType.Path;
                 } else if(color.red > 150 && color.green < 50 && color.blue < 50) { //Red cube
-                    pixel = PioneerProcessedImagePixel.Block;
+                    pixel = PioneerProcessedPixelType.Block;
                 } else {
-                    pixel = PioneerProcessedImagePixel.Nothing;
+                    pixel = PioneerProcessedPixelType.Nothing;
                 }
                 pixels[x][y] = pixel;
             }
@@ -27,5 +28,24 @@ public class PioneerProcessedImage {
 
     public int getResolutionX() { return pixels.length; }
     public int getResolutionY() { return pixels[0].length; }
-    public PioneerProcessedImagePixel getPixel(int x, int y) { return pixels[x][y]; }
+    public PioneerProcessedPixelType getPixel(int x, int y) { return pixels[x][y]; }
+
+    public Float getAverageNormalizedScreenX(PioneerProcessedPixelType pixelType) {
+        int halfWidth = getResolutionX() / 2;
+        int numPathPixels = 0;
+        double totalNormalizedPathXes = 0;
+        for(int y = 0; y < getResolutionY(); y++) {
+            for(int x = 0; x < getResolutionX(); x++) {
+                if(getPixel(x, y) == pixelType) {
+                    totalNormalizedPathXes += (x - halfWidth) / (double) halfWidth;
+                    numPathPixels++;
+                }
+            }
+        }
+        if(numPathPixels != 0) {
+            return (float) (totalNormalizedPathXes / numPathPixels);
+        } else {
+            return null;
+        }
+    }
 }

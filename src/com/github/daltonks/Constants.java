@@ -11,4 +11,6 @@ public class Constants {
     public static final String LEFT_MOTOR_NAME = "Pioneer_p3dx_leftMotor";
     public static final String RIGHT_MOTOR_NAME = "Pioneer_p3dx_rightMotor";
     public static final String CAMERA_NAME = "cam1";
+
+    public static final float PIONEER_SPEED = 3;
 }

@@ -1,6 +1,6 @@
 package com.github.daltonks.pioneer.imageProcessing;
 
-public enum PioneerProcessedImagePixel {
+public enum PioneerProcessedPixelType {
     Nothing,
     Path,
     Block
