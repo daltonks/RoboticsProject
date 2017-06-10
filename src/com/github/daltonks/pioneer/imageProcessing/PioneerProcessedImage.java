@@ -2,7 +2,6 @@ package com.github.daltonks.pioneer.imageProcessing;
 
 import com.github.daltonks.Color;
 import com.github.daltonks.SensorImage;
-import javafx.util.Pair;
 
 public class PioneerProcessedImage {
     private PioneerProcessedPixelType[][] pixels;

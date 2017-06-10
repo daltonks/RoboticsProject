@@ -13,4 +13,5 @@ public class Constants {
     public static final String CAMERA_NAME = "cam1";
 
     public static final float PIONEER_SPEED = 3;
+    public static final float PIONEER_MOTOR_VELOCITY_DAMPING = .9f;
 }

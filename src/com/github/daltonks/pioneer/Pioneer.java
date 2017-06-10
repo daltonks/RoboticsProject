@@ -11,6 +11,8 @@ public class Pioneer {
     private SimObject leftMotor;
     private SimObject rightMotor;
     private SimObject camera;
+    private float lastLeftMotorVelocity;
+    private float lastRightMotorVelocity;
     private HashMap<PioneerStateType, PioneerState> states;
     private PioneerState currentState;
 
@@ -31,18 +33,25 @@ public class Pioneer {
         PioneerProcessedImage processedImage = new PioneerProcessedImage(camera.getVisionSensorImage());
         PioneerStateUpdateResultDto stateUpdateResult = currentState.update(processedImage);
 
-        float leftMotorVelocity;
-        float rightMotorVelocity;
+        float targetLeftMotorVelocity;
+        float targetRightMotorVelocity;
         if(stateUpdateResult.normalizedXMoveDirection >= 0) {
-            leftMotorVelocity = Constants.PIONEER_SPEED;
-            rightMotorVelocity = (-stateUpdateResult.normalizedXMoveDirection + 1) * Constants.PIONEER_SPEED;
+            targetLeftMotorVelocity = Constants.PIONEER_SPEED;
+            targetRightMotorVelocity = (-stateUpdateResult.normalizedXMoveDirection + 1) * Constants.PIONEER_SPEED;
         } else {
-            leftMotorVelocity = stateUpdateResult.normalizedXMoveDirection + 1;
-            rightMotorVelocity = Constants.PIONEER_SPEED;
+            targetLeftMotorVelocity = (stateUpdateResult.normalizedXMoveDirection + 1) * Constants.PIONEER_SPEED;
+            targetRightMotorVelocity = Constants.PIONEER_SPEED;
         }
-        leftMotor.setJointTargetVelocity(leftMotorVelocity);
-        rightMotor.setJointTargetVelocity(rightMotorVelocity);
+        lastLeftMotorVelocity = lerp(lastLeftMotorVelocity, targetLeftMotorVelocity, 1 - Constants.PIONEER_MOTOR_VELOCITY_DAMPING);
+        lastRightMotorVelocity = lerp(lastRightMotorVelocity, targetRightMotorVelocity, 1 - Constants.PIONEER_MOTOR_VELOCITY_DAMPING);
+        leftMotor.setJointTargetVelocity(lastLeftMotorVelocity);
+        rightMotor.setJointTargetVelocity(lastRightMotorVelocity);
 
         currentState = states.get(stateUpdateResult.nextState);
+    }
+
+    float lerp(float point1, float point2, float alpha)
+    {
+        return point1 + alpha * (point2 - point1);
     }
 }
