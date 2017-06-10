@@ -9,26 +9,25 @@ public class Simulation {
     private remoteApi api;
     private int clientID;
 
-    public remoteApi getRemoteApi() {
-        return api;
-    }
+    public remoteApi getRemoteApi() { return api; }
 
-    public int getClientID() {
-        return clientID;
-    }
+    public int getClientID() { return clientID; }
 
     public void start(String ip, int port, boolean waitUntilConnected, boolean doNotReconnectOnceDisconnected, int timeOutInMs, int commThreadCycleInMs) throws ConnectException {
         api = new remoteApi();
 
-        api.simxFinish(-1); // close all opened connections
+        closeAllOpenedConnections();
         clientID = api.simxStart(ip, port, waitUntilConnected, doNotReconnectOnceDisconnected, timeOutInMs, commThreadCycleInMs);
         if (clientID != -1)
         {
             System.out.println("Connected to remote API server");
-        }
-        else {
+        } else {
             throw new ConnectException("Failed connecting to remote API server");
         }
+    }
+
+    private void closeAllOpenedConnections() {
+        api.simxFinish(-1);
     }
 
     public void end() {

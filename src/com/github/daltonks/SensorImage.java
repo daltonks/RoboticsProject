@@ -2,21 +2,8 @@ package com.github.daltonks;
 
 public class SensorImage {
     private Color[][] colors;
-    private int resolutionX;
-    private int resolutionY;
-
-    public int getResolutionX() {
-        return resolutionX;
-    }
-
-    public int getResolutionY() {
-        return resolutionY;
-    }
 
     public SensorImage(char[] charColors, int resolutionX, int resolutionY) {
-        this.resolutionX = resolutionX;
-        this.resolutionY = resolutionY;
-
         colors = new Color[resolutionX][resolutionY];
 
         for(int y = 0; y < resolutionY; y++) {
@@ -32,7 +19,7 @@ public class SensorImage {
         }
     }
 
-    public Color getColor(int x, int y) {
-        return colors[x][y];
-    }
+    public int getResolutionX() { return colors.length; }
+    public int getResolutionY() { return colors[0].length; }
+    public Color getColor(int x, int y) { return colors[x][y]; }
 }
