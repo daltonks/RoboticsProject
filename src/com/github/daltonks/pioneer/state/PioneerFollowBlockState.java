@@ -2,10 +2,18 @@ package com.github.daltonks.pioneer.state;
 
 import com.github.daltonks.Constants;
 import com.github.daltonks.pioneer.imageProcessing.PioneerProcessedPixelType;
+import com.github.daltonks.pioneer.state.base.PioneerState;
+import com.github.daltonks.pioneer.state.base.PioneerStateType;
+import com.github.daltonks.pioneer.state.base.PioneerStateUpdateDto;
 
 public class PioneerFollowBlockState implements PioneerState {
     private int highestBlockPixelCount;
     private long lastFoundHighestCountTime;
+
+    @Override
+    public void onEnterState() {
+
+    }
 
     @Override
     public void update(PioneerStateUpdateDto dto) {
@@ -23,8 +31,7 @@ public class PioneerFollowBlockState implements PioneerState {
             //Reset variables
             highestBlockPixelCount = 0;
             lastFoundHighestCountTime = 0;
-            dto.nextState = PioneerStateType.FollowPath;
-            System.out.println("booped the thing!");
+            dto.nextState = PioneerStateType.Reverse;
         } else {
             dto.nextState = PioneerStateType.FollowBlock;
             Float averageNormalizedPathScreenX = dto.processedImage.getAverageNormalizedScreenX(PioneerProcessedPixelType.Block);

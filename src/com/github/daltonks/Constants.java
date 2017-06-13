@@ -20,12 +20,14 @@ public class Constants {
     public static final short PATH_MAX_GREEN = 20;
     public static final short PATH_MAX_BLUE = 20;
 
-    public static final short BLOCK_MIN_RED = 20;
-    public static final short BLOCK_MAX_GREEN = 20;
-    public static final short BLOCK_MAX_BLUE = 20;
+    public static final short BLOCK_MIN_RED = 150;
+    public static final short BLOCK_MAX_GREEN = 50;
+    public static final short BLOCK_MAX_BLUE = 50;
 
-    public static final int NUM_BLOCK_PIXELS_BEFORE_FOLLOW = 100;
+    public static final int NUM_BLOCK_PIXELS_BEFORE_FOLLOW = 170;
 
     public static final int NUM_BLOCK_PIXELS_BEFORE_CONSIDERING_COLLISION = 7000;
     public static final int ACCEPT_BLOCK_COLLISION_MILLIS = 400;
+
+    public static final int REVERSE_TIME_MILLIS = 2000;
 }
