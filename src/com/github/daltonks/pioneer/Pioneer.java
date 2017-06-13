@@ -15,6 +15,7 @@ public class Pioneer {
     private float lastRightMotorVelocity;
     private HashMap<PioneerStateType, PioneerState> states;
     private PioneerState currentState;
+    private PioneerStateUpdateDto updateDto = new PioneerStateUpdateDto();
 
     public Pioneer(SimObject leftMotor, SimObject rightMotor, SimObject camera) {
         this.leftMotor = leftMotor;
@@ -31,15 +32,16 @@ public class Pioneer {
 
     public void update() {
         PioneerProcessedImage processedImage = new PioneerProcessedImage(camera.getVisionSensorImage());
-        PioneerStateUpdateResultDto stateUpdateResult = currentState.update(processedImage);
+        updateDto.processedImage = processedImage;
+        currentState.update(updateDto);
 
         float targetLeftMotorVelocity;
         float targetRightMotorVelocity;
-        if(stateUpdateResult.normalizedXMoveDirection >= 0) {
+        if(updateDto.normalizedXMoveDirection >= 0) {
             targetLeftMotorVelocity = Constants.PIONEER_SPEED;
-            targetRightMotorVelocity = (-stateUpdateResult.normalizedXMoveDirection + 1) * Constants.PIONEER_SPEED;
+            targetRightMotorVelocity = (-updateDto.normalizedXMoveDirection + 1) * Constants.PIONEER_SPEED;
         } else {
-            targetLeftMotorVelocity = (stateUpdateResult.normalizedXMoveDirection + 1) * Constants.PIONEER_SPEED;
+            targetLeftMotorVelocity = (updateDto.normalizedXMoveDirection + 1) * Constants.PIONEER_SPEED;
             targetRightMotorVelocity = Constants.PIONEER_SPEED;
         }
         lastLeftMotorVelocity = lerp(lastLeftMotorVelocity, targetLeftMotorVelocity, 1 - Constants.PIONEER_MOTOR_VELOCITY_DAMPING);
@@ -47,10 +49,10 @@ public class Pioneer {
         leftMotor.setJointTargetVelocity(lastLeftMotorVelocity);
         rightMotor.setJointTargetVelocity(lastRightMotorVelocity);
 
-        currentState = states.get(stateUpdateResult.nextState);
+        currentState = states.get(updateDto.nextState);
     }
 
-    float lerp(float point1, float point2, float alpha)
+    private float lerp(float point1, float point2, float alpha)
     {
         return point1 + alpha * (point2 - point1);
     }

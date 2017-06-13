@@ -5,7 +5,7 @@ public class Color {
     public short green;
     public short blue;
 
-    public Color(char red, char green, char blue) {
+    public Color(int red, int green, int blue) {
         this.red = (short) red;
         this.green = (short) green;
         this.blue = (short) blue;

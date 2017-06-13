@@ -13,7 +13,7 @@ public class Main {
                 Constants.WAIT_UNTIL_CONNECTED,
                 Constants.DO_NOT_RECONNECT_ONCE_DISCONNECTED,
                 Constants.TIME_OUT_IN_MS,
-                Constants.COMM_THREAD_CYCLE_IN_MS
+                Constants.COMM_THREAD_CYCLE_MILLIS
             );
 
             SimObject leftMotor = simulation.getObject(Constants.LEFT_MOTOR_NAME);
@@ -22,7 +22,7 @@ public class Main {
             Pioneer pioneer = new Pioneer(leftMotor, rightMotor, camera);
             while(true) {
                 pioneer.update();
-                Thread.sleep(30);
+                Thread.sleep(Constants.UPDATE_LOOP_MILLIS);
             }
         } catch (Exception e) {
             e.printStackTrace();

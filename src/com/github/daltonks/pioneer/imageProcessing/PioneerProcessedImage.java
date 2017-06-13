@@ -1,6 +1,7 @@
 package com.github.daltonks.pioneer.imageProcessing;
 
 import com.github.daltonks.Color;
+import com.github.daltonks.Constants;
 import com.github.daltonks.SensorImage;
 
 public class PioneerProcessedImage {
@@ -13,9 +14,14 @@ public class PioneerProcessedImage {
                 Color color = image.getColor(x, y);
 
                 PioneerProcessedPixelType pixel;
-                if(color.red < 20 && color.green < 20 && color.blue < 20) { //Black path
+                if(color.red < Constants.PATH_MAX_RED
+                    && color.green < Constants.PATH_MAX_GREEN
+                    && color.blue < Constants.PATH_MAX_BLUE) { //Black path
+
                     pixel = PioneerProcessedPixelType.Path;
-                } else if(color.red > 150 && color.green < 50 && color.blue < 50) { //Red cube
+                } else if(color.red > Constants.BLOCK_MIN_RED
+                            && color.green < Constants.BLOCK_MAX_GREEN
+                            && color.blue < Constants.BLOCK_MAX_BLUE) { //Red cube
                     pixel = PioneerProcessedPixelType.Block;
                 } else {
                     pixel = PioneerProcessedPixelType.Nothing;
@@ -46,5 +52,17 @@ public class PioneerProcessedImage {
         } else {
             return null;
         }
+    }
+
+    public int getNumPixels(PioneerProcessedPixelType pixelType) {
+        int result = 0;
+        for(int y = 0; y < getResolutionY(); y++) {
+            for(int x = 0; x < getResolutionX(); x++) {
+                if(getPixel(x, y) == pixelType) {
+                    result++;
+                }
+            }
+        }
+        return result;
     }
 }
