@@ -18,41 +18,19 @@ namespace ObjectTracker
         {
             Directory.CreateDirectory(OUTPUT_DIRECTORY);
 
-            var numFrames = ReadAllFrames(
-                filePath: INPUT_VIDEO_PATH,
-                onFrameProcessed: (bitmap, index) =>
-                {
-                    bitmap.SetPixel(0, 0, Color.Red);
-                    bitmap.Save($"{OUTPUT_DIRECTORY}{index}.bmp");
-                }
-            );
-        }
-
-        /// <summary>
-        /// Processes all frames of a video
-        /// </summary>
-        /// <param name="filePath">Path to the video</param>
-        /// <param name="onFrameProcessed">Provides a bitmap and an index of a frame that is processing</param>
-        /// <returns>The total number of frames</returns>
-        static int ReadAllFrames(string filePath, Action<Bitmap, int> onFrameProcessed)
-        {
-            using (var reader = new VideoFileReader())
+            using (var frameReader = new VideoFrameReader(INPUT_VIDEO_PATH))
             {
-                reader.Open(filePath);
-                Bitmap frameBitmap;
-                int index = 0;
-                while ((frameBitmap = reader.ReadVideoFrame()) != null)
-                {
-                    using (frameBitmap)
+                Console.WriteLine(frameReader.Width + ", " + frameReader.Height);
+                var numFrames = frameReader.ReadAllFrames(
+                    (bitmap, index) =>
                     {
-                        onFrameProcessed.Invoke(frameBitmap, index);
-                        
+                        using (bitmap)
+                        {
+                            bitmap.SetPixel(0, 0, Color.Red);
+                            bitmap.Save($"{OUTPUT_DIRECTORY}{index}.bmp");
+                        }
                     }
-                    index++;
-                }
-                
-                var frameCount = index;
-                return frameCount;
+                );
             }
         }
     }
