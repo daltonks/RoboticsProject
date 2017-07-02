@@ -13,38 +13,12 @@ namespace ObjectTracker
     {
         private const string INPUT_VIDEO_PATH = "input/Walk1.mpg";
         private const string OUTPUT_DIRECTORY = "output/";
-        private const string OUTPUT_VIDEO_PATH = "output/Walk1.mpg";
+        private const string OUTPUT_VIDEO_NAME = "Walk1.mpg";
 
         static void Main(string[] args)
         {
-            Directory.CreateDirectory(OUTPUT_DIRECTORY);
-
-            using (var reader = new VideoFrameReader(INPUT_VIDEO_PATH))
-            {
-                using (var writer = new VideoFileWriter())
-                {
-                    writer.Open(
-                        OUTPUT_VIDEO_PATH,
-                        reader.UnderlyingReader.Width,
-                        reader.UnderlyingReader.Height
-                    );
-
-                    Bitmap lastBitmap = null;
-                    reader.ReadAllFrames(
-                        (bitmap, index) =>
-                        {
-                            if (lastBitmap != null)
-                            {
-                                bitmap.SetPixel(0, 0, Color.Red);
-                                lastBitmap.Dispose();
-                            }
-                            writer.WriteVideoFrame(bitmap);
-                            lastBitmap = bitmap;
-                        }
-                    );
-                    lastBitmap.Dispose();
-                }
-            }
+            var objectTracker = new VideoObjectTracker();
+            objectTracker.Process(INPUT_VIDEO_PATH, OUTPUT_DIRECTORY, OUTPUT_VIDEO_NAME);
         }
     }
 }
