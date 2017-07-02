@@ -10,38 +10,32 @@ namespace ObjectTracker
 {
     public class VideoFrameReader : IDisposable
     {
-        public int Width => _underlyingReader.Width;
-        public int Height => _underlyingReader.Height;
-        private readonly VideoFileReader _underlyingReader;
+        public readonly VideoFileReader UnderlyingReader;
 
         public VideoFrameReader(string filePath)
         {
-            _underlyingReader = new VideoFileReader();
-            _underlyingReader.Open(filePath);
+            UnderlyingReader = new VideoFileReader();
+            UnderlyingReader.Open(filePath);
         }
 
         /// <summary>
         /// Processes all frames of a video
         /// </summary>
         /// <param name="onFrameProcessed">Provides a bitmap and an index of a frame that is processing</param>
-        /// <returns>The total number of frames</returns>
-        public int ReadAllFrames(Action<Bitmap, int> onFrameProcessed)
+        public void ReadAllFrames(Action<Bitmap, int> onFrameProcessed)
         {
             Bitmap frameBitmap;
             int index = 0;
-            while ((frameBitmap = _underlyingReader.ReadVideoFrame()) != null)
+            while ((frameBitmap = UnderlyingReader.ReadVideoFrame()) != null)
             {
                 onFrameProcessed.Invoke(frameBitmap, index);
                 index++;
             }
-
-            var frameCount = index;
-            return frameCount;
         }
 
         public void Dispose()
         {
-            _underlyingReader.Dispose();
+            UnderlyingReader.Dispose();
         }
     }
 }
