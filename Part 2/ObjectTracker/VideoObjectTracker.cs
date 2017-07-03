@@ -12,7 +12,8 @@ namespace ObjectTracker
 {
     public class VideoObjectTracker
     {
-        private readonly double MOVEMENT_STANDARD_DEVIATIONS = 8;
+        private readonly int DIFFERENCE_RADIUS = 3;
+        private readonly double MOVEMENT_STANDARD_DEVIATIONS = 8.5;
 
         public void Process(string inputPath, string outputDirectory, string outputName)
         {
@@ -27,27 +28,40 @@ namespace ObjectTracker
                         reader.UnderlyingReader.Width,
                         reader.UnderlyingReader.Height
                     );
-
-                    FastBitmap lastBitmap = null;
+                    
+                    var tasks = new List<Task<Bitmap>>();
+                    Bitmap lastBitmap = null;
                     reader.ReadAllFrames(
                         (bitmap, index) =>
                         {
-                            if (index > 50)
-                            {
-                                return;
-                            }
+                            //if (index > 200)
+                            //{
+                            //    return;
+                            //}
                             var fastBitmap = new FastBitmap(bitmap);
-                            fastBitmap.LockBitmap();
-                            var outputBitmap = ProcessFrame(fastBitmap, lastBitmap);
-                            fastBitmap.UnlockBitmap();
-                            writer.WriteVideoFrame(outputBitmap);
-                            lastBitmap?.Dispose();
-                            lastBitmap = new FastBitmap(bitmap);
-                            lastBitmap.LockBitmap();
-                            Console.WriteLine($"Processed frame {index}");
+                            var fastLastBitmap = lastBitmap == null ? null : new FastBitmap(lastBitmap);
+                            lastBitmap = bitmap;
+                            tasks.Add(Task.Run(
+                                () =>
+                                {
+                                    fastBitmap.LockBitmap();
+                                    fastLastBitmap?.LockBitmap();
+                                    var outputBitmap = ProcessFrame(fastBitmap, fastLastBitmap);
+                                    fastBitmap.UnlockBitmap();
+                                    fastLastBitmap?.UnlockBitmap();
+                                    fastLastBitmap?.Dispose();
+                                    return outputBitmap;
+                                }
+                            ));
                         }
                     );
-                    lastBitmap.Dispose();
+
+                    for (int i = 0; i < tasks.Count(); i++)
+                    {
+                        var task = tasks[i];
+                        writer.WriteVideoFrame(task.Result);
+                        Console.WriteLine($"Processed frame {i}");
+                    }
                 }
             }
         }
@@ -65,16 +79,15 @@ namespace ObjectTracker
             {
                 for (var y = 0; y < bitmap.Height; y++)
                 {
-                    const int radius = 3;
                     int difference = 0;
-                    for (var xOffset = -radius; xOffset <= radius; xOffset++)
+                    for (var xOffset = -DIFFERENCE_RADIUS; xOffset <= DIFFERENCE_RADIUS; xOffset++)
                     {
-                        for (var yOffset = -radius; yOffset <= radius; yOffset++)
+                        for (var yOffset = -DIFFERENCE_RADIUS; yOffset <= DIFFERENCE_RADIUS; yOffset++)
                         {
                             var xOffsetSquared = xOffset * xOffset;
                             var yOffsetSquared = yOffset * yOffset;
                             var distance = Math.Sqrt(xOffsetSquared - yOffsetSquared);
-                            if (distance <= radius)
+                            if (distance <= DIFFERENCE_RADIUS)
                             {
                                 difference += GetPixelDifference(bitmap, lastBitmap, x + xOffset, y + yOffset);
                             }
@@ -104,10 +117,9 @@ namespace ObjectTracker
                 for (var y = 0; y < colorDifferenceMatrix.GetLength(1); y++)
                 {
                     var colorDifference = colorDifferenceMatrix[x, y];
-                    
                     if (colorDifference >= standardDeviation * MOVEMENT_STANDARD_DEVIATIONS)
                     {
-                        bitmap.SetPixel(x, y, new PixelData{ red = 255, green = 127, blue = 255 });
+                        bitmap.SetPixel(x, y, new PixelData{ red = 127, green = 255, blue = 0 });
                     }
                 }
             }

@@ -6,7 +6,7 @@ namespace ObjectTracker
 {
     public unsafe class FastBitmap
     {
-        Bitmap bitmap;
+        public Bitmap Bitmap { get; private set; }
 
         // three elements used for MakeGreyUnsafe
         int dataWidth;
@@ -20,21 +20,13 @@ namespace ObjectTracker
         {
             if (bitmap != null)
             {
-                this.bitmap = bitmap.Clone() as Bitmap;
+                Bitmap = bitmap.Clone() as Bitmap;
             }
         }
 
         public void Dispose()
         {
-            bitmap.Dispose();
-        }
-
-        public Bitmap Bitmap
-        {
-            get
-            {
-                return (bitmap);
-            }
+            Bitmap.Dispose();
         }
 
         private Point PixelSize
@@ -42,7 +34,7 @@ namespace ObjectTracker
             get
             {
                 GraphicsUnit unit = GraphicsUnit.Pixel;
-                RectangleF bounds = bitmap.GetBounds(ref unit);
+                RectangleF bounds = Bitmap.GetBounds(ref unit);
 
                 return new Point((int)bounds.Width, (int)bounds.Height);
             }
@@ -51,7 +43,7 @@ namespace ObjectTracker
         public void LockBitmap()
         {
             GraphicsUnit unit = GraphicsUnit.Pixel;
-            RectangleF boundsF = bitmap.GetBounds(ref unit);
+            RectangleF boundsF = Bitmap.GetBounds(ref unit);
             Width = (int) boundsF.Width;
             Height = (int) boundsF.Height;
             Rectangle bounds = new Rectangle((int)boundsF.X,
@@ -68,12 +60,11 @@ namespace ObjectTracker
             {
                 dataWidth = 4 * (dataWidth / 4 + 1);
             }
-            bitmapData =
-                bitmap.LockBits(bounds, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+            bitmapData = Bitmap.LockBits(bounds, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
 
             pBase = (Byte*)bitmapData.Scan0.ToPointer();
 
-            pixels = new PixelData[bitmap.Width, bitmap.Height];
+            pixels = new PixelData[Bitmap.Width, Bitmap.Height];
             for (var x = 0; x < Width; x++)
             {
                 for (var y = 0; y < Height; y++)
@@ -96,7 +87,7 @@ namespace ObjectTracker
 
         public void UnlockBitmap()
         {
-            bitmap.UnlockBits(bitmapData);
+            Bitmap.UnlockBits(bitmapData);
             bitmapData = null;
             pBase = null;
         }
