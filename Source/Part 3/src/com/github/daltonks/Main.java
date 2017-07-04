@@ -2,11 +2,15 @@ package com.github.daltonks;
 
 import com.github.daltonks.pioneer.Pioneer;
 
+import java.io.IOException;
+
 public class Main {
     public static void main(String[] args)
     {
-        Simulation simulation = new Simulation();
+        Simulation simulation = null;
         try {
+            simulation = new Simulation();
+
             simulation.start(
                 Constants.REMOTE_IP,
                 Constants.REMOTE_PORT,
@@ -28,9 +32,16 @@ public class Main {
             e.printStackTrace();
         }
 
-        simulation.end();
+        if (simulation != null) {
+            simulation.end();
+        }
 
-        System.out.println("Program ended");
+        System.out.println("Complete. Press enter to exit.");
+        try {
+            System.in.read();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
 
